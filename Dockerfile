@@ -3,23 +3,18 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt install -y \
-    openssh-server \
-    sudo \
     curl \
     wget \
     git \
     vim \
-    net-tools \
-    tzdata \
- && mkdir /var/run/sshd
+    sudo \
+    ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
-# set password root (ganti bebas)
-RUN echo "root:root123" | chpasswd
+# install ttyd
+RUN wget -O /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 \
+ && chmod +x /usr/bin/ttyd
 
-# allow root login
-RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
- && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+EXPOSE 7681
 
-EXPOSE 22
-
-CMD ["/usr/sbin/sshd","-D"]
+CMD ["ttyd", "-p", "7681", "bash"]
